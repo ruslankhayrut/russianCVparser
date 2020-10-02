@@ -1,2 +1,3 @@
 from .document import Document
-from .cvparser import CVParser, show_json
+from .nlparser import CVparser
+from .helpers import show_json

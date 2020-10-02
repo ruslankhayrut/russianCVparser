@@ -61,6 +61,8 @@ def parse(text):
     return d
 
 
-def dump_as_json(string):
-    json_string = json.dumps(string, ensure_ascii=False, indent=2)
-    return json_string
+class CVparser:
+
+    @staticmethod
+    def parse_text(text):
+        return parse(text)
