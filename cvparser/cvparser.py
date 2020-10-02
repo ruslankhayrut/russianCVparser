@@ -10,3 +10,7 @@ class CVParser:
     def parse_text(self, text):
         res = parse(text)
         return res
+
+
+def show_json(data):
+    print(json.dumps(data, ensure_ascii=False, indent=2))

@@ -41,15 +41,15 @@ def parse(text):
         edu_tokens = edu_tokens[:edu_tokens.index(hobby_title.tokens[0])]
         hobby_tokens = tokens[tokens.index(hobby_title.tokens[0]):]
 
-    socdem_match = SocdemExtractor().find(socdem_tokens)
-    exp_matches = WorkplaceExtractor(named_entities).find(exp_tokens)
+    socdem_match = SocdemExtractor(named_entities['person_names']).find(socdem_tokens)
+    exp_matches = WorkplaceExtractor(named_entities['orgnames']).find(exp_tokens)
     edu_matches = EducationExtractor().find(edu_tokens)
     hobby_matches = HobbyExtractor().find(hobby_tokens)
 
-    socdem_fact = [dump_as_json(socdem_match.fact.as_json)]
-    exp_facts = [dump_as_json(match.fact.as_json) for match in exp_matches]
-    edu_facts = [dump_as_json(match.fact.as_json) for match in edu_matches]
-    hobby_facts = [dump_as_json(match.fact.as_json) for match in hobby_matches]
+    socdem_fact = socdem_match.fact.as_json
+    exp_facts = [match.fact.as_json for match in exp_matches]
+    edu_facts = [match.fact.as_json for match in edu_matches]
+    hobby_facts = [match.fact.as_json for match in hobby_matches]
 
     d = {
         'socdem': socdem_fact,

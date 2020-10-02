@@ -41,8 +41,26 @@ def load_named_entities(text):
 
     ner_tagger = NewsNERTagger(NewsEmbedding())
     doc.tag_ner(ner_tagger)
-    orgnames = set([span.text.split('\n')[0] for span in doc.spans if span.type == 'ORG'])
-    return orgnames
+
+    person_names = set()
+    orgnames = set()
+    locations = set()
+    for span in doc.spans:
+        text = span.text
+        if span.type == 'PER':
+            person_names.add(text)
+        elif span.type == 'ORG':
+            orgnames.add(text)
+        elif span.type == 'LOC':
+            locations.add(text)
+
+    d = {
+        'person_names': person_names,
+        'orgnames': orgnames,
+        'locations': locations
+    }
+
+    return d
 
 
 class IdTokenizer(Tokenizer):

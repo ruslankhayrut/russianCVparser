@@ -1,2 +1,2 @@
 from .document import Document
-from .cvparser import CVParser
+from .cvparser import CVParser, show_json
