@@ -43,7 +43,8 @@ class Document:
         ext = filename.rsplit('.', 1)[1].lower()
         return ext
 
-    def __extract_from_pdf(self, file):
+    @staticmethod
+    def __extract_from_pdf(file):
         resource_manager = PDFResourceManager()
         fake_file_handle = StringIO()
         converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams(line_margin=0.1,
