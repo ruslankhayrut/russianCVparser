@@ -1,3 +1,3 @@
-from russianCVparser.cvparser.document import Document
-from russianCVparser.cvparser.nlparser import CVparser
-from russianCVparser.cvparser.helpers import show_json
+from .cvparser.helpers import show_json
+from .cvparser.nlparser import CVparser
+from .cvparser.document import Document

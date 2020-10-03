@@ -30,7 +30,8 @@ Workplace = fact(
 Dicts
 """
 FOLDER = os.path.dirname(__file__)
-OCCUPATIONS = load_lines(os.path.join(FOLDER, 'dicts/occupations.txt'))
+DICTS_FOLDER = os.path.join(FOLDER, 'dicts')
+OCCUPATIONS = load_lines(os.path.join(DICTS_FOLDER, 'occupations.txt'))
 """
 """
 

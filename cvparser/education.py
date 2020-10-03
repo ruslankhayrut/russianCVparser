@@ -30,8 +30,9 @@ Education = fact(
 Creating dicts
 """
 FOLDER = os.path.dirname(__file__)
-UNI_NAMES = load_lines(os.path.join(FOLDER, 'dicts/VUZY.txt'))
-SPECIALIZATIONS = load_lines(os.path.join(FOLDER, 'dicts/specs_only.txt'))
+DICTS_FOLDER = os.path.join(FOLDER, 'dicts')
+UNI_NAMES = load_lines(os.path.join(DICTS_FOLDER, 'VUZY.txt'))
+SPECIALIZATIONS = load_lines(os.path.join(DICTS_FOLDER, 'specs_only.txt'))
 
 UNI_NAME = caseless_pipeline(UNI_NAMES)
 SPECIALIZATION = caseless_pipeline(SPECIALIZATIONS)
