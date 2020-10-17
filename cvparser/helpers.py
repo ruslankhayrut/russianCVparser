@@ -1,4 +1,5 @@
 import json
+import re
 from yargy import Parser
 from yargy.tokenizer import Tokenizer, MorphTokenizer, EOL
 from ipymarkup import show_span_ascii_markup as show_markup
@@ -35,32 +36,27 @@ def select_span_tokens(tokens, spans):
             yield token
 
 
-def load_named_entities(text):
+def __tag_text(text):
     doc = Doc(text)
     doc.segment(Segmenter())
 
     ner_tagger = NewsNERTagger(NewsEmbedding())
     doc.tag_ner(ner_tagger)
+    return doc
 
-    person_names = set()
+
+def load_named_entities(text):
+    tagged_text = __tag_text(text)
+    # tagged_text.ner.print()
     orgnames = set()
-    locations = set()
-    for span in doc.spans:
-        text = span.text
-        if span.type == 'PER':
-            person_names.add(text)
-        elif span.type == 'ORG':
-            orgnames.add(text)
-        elif span.type == 'LOC':
-            locations.add(text)
 
-    d = {
-        'person_names': person_names,
-        'orgnames': orgnames,
-        'locations': locations
-    }
+    for span in tagged_text.spans:
+        if span.type in ('ORG', 'PER'):
+            name = span.text
+            name = re.sub(r'[\n\r\t\x0c]+', ' ', name)
+            orgnames.add(name)
 
-    return d
+    return orgnames
 
 
 class IdTokenizer(Tokenizer):

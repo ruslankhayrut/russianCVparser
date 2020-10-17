@@ -1,10 +1,7 @@
-import json
-
-from .helpers import TOKENIZER, ID_TOKENIZER, load_named_entities, show_json
+from .helpers import TOKENIZER, ID_TOKENIZER, load_named_entities
 from .education import EducationExtractor
 from .workplace import WorkplaceExtractor
 from .hobby import HobbyExtractor
-from .socdem import SocdemExtractor
 
 from yargy.parser import Parser
 from yargy.pipelines import pipeline, caseless_pipeline
@@ -12,13 +9,15 @@ from yargy.pipelines import pipeline, caseless_pipeline
 
 EXP_TITLE = pipeline(['Опыт работы'])
 EDU_TITLE = pipeline(['Образование'])
+EXTRA_EDU_TITLE = caseless_pipeline(['Курсы', 'Сертификаты'])
 HOBBY_TITLE = caseless_pipeline(['Хобби', 'Увлечения'])
 
 
 def parse(text):
 
     named_entities = load_named_entities(text)
-    socdem_tokens = exp_tokens = edu_tokens = hobby_tokens = tokens = list(TOKENIZER(text))
+    exp_tokens = edu_tokens = hobby_tokens = tokens = list(TOKENIZER(text))
+    extra_edu_tokens = []
 
     parser = Parser(EXP_TITLE, tokenizer=ID_TOKENIZER)
     exp_title = parser.find(tokens)
@@ -30,7 +29,6 @@ def parse(text):
     hobby_title = parser.find(tokens)
 
     if exp_title:
-        socdem_tokens = tokens[:tokens.index(exp_title.tokens[0])]
         exp_tokens = tokens[tokens.index(exp_title.tokens[0]):]
 
     if edu_title:
@@ -41,20 +39,27 @@ def parse(text):
         edu_tokens = edu_tokens[:edu_tokens.index(hobby_title.tokens[0])]
         hobby_tokens = tokens[tokens.index(hobby_title.tokens[0]):]
 
-    socdem_match = SocdemExtractor(named_entities['person_names']).find(socdem_tokens)
-    exp_matches = WorkplaceExtractor(named_entities['orgnames']).find(exp_tokens)
+    if len(edu_tokens) < len(tokens):
+        parser = Parser(EXTRA_EDU_TITLE, tokenizer=ID_TOKENIZER)
+        extra_edu_title = parser.find(edu_tokens)
+        if extra_edu_title:
+            pivot_index = edu_tokens.index(extra_edu_title.tokens[0])
+            edu_tokens, extra_edu_tokens = edu_tokens[:pivot_index], edu_tokens[pivot_index:]
+
+    exp_matches = WorkplaceExtractor(named_entities).find(exp_tokens)
     edu_matches = EducationExtractor().find(edu_tokens)
+    extra_edu_matches = EducationExtractor(extra=True).find(extra_edu_tokens)
     hobby_matches = HobbyExtractor().find(hobby_tokens)
 
-    socdem_fact = socdem_match.fact.as_json
     exp_facts = [match.fact.as_json for match in exp_matches]
     edu_facts = [match.fact.as_json for match in edu_matches]
+    extra_edu_facts = [match.fact.as_json for match in extra_edu_matches]
     hobby_facts = [match.fact.as_json for match in hobby_matches]
 
     d = {
-        'socdem': socdem_fact,
-        'career': exp_facts,
+        'experience': exp_facts,
         'education': edu_facts,
+        'extra_education': extra_edu_facts,
         'hobby': hobby_facts
     }
 

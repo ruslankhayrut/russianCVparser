@@ -1,12 +1,14 @@
 import os
 import sys
+import re
 from io import StringIO
 import docx2txt
-from pdfminer.converter import TextConverter
-from pdfminer.pdfinterp import PDFPageInterpreter
-from pdfminer.pdfinterp import PDFResourceManager
-from pdfminer.pdfpage import PDFPage
 from pdfminer.layout import LAParams
+from pdfminer.converter import TextConverter
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfparser import PDFParser
 
 
 class Document:
@@ -45,19 +47,21 @@ class Document:
 
     @staticmethod
     def __extract_from_pdf(file):
+        parser = PDFParser(file)
+        doc = PDFDocument(parser)
         resource_manager = PDFResourceManager()
-        fake_file_handle = StringIO()
-        converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams(line_margin=0.1,
-                                                                                        char_margin=20,
-                                                                                        boxes_flow=0.4))
+        output_string = StringIO()
+        converter = TextConverter(resource_manager, output_string, laparams=LAParams(char_margin=15,
+                                                                                     line_margin=0.5,
+                                                                                     boxes_flow=0))
+
         page_interpreter = PDFPageInterpreter(resource_manager, converter)
 
-        for page in PDFPage.get_pages(file,
-                                      caching=True,
-                                      check_extractable=True):
+        for page in PDFPage.create_pages(doc):
             page_interpreter.process_page(page)
 
-        text = fake_file_handle.getvalue()
+        text = output_string.getvalue()
+        text = re.sub(r'(Резюме обновлено)([А-Яа-я\d :])+', '', text)
         converter.close()
-        fake_file_handle.close()
+        output_string.close()
         return text
